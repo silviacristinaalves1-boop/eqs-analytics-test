@@ -104,7 +104,297 @@ RULES: list[Rule] = [
             ) AS rows_failed
         FROM raw.sites
     """
-)   
+) ,
+Rule(
+    rule_id="DQ005",
+    rule_name="incident_id unique",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) - count(DISTINCT incident_id) AS rows_failed
+        FROM raw.incidents
+    """
+),
+ Rule(
+    rule_id="DQ006",
+    rule_name="site exists",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE s.site_id IS NULL
+            ) AS rows_failed
+        FROM raw.incidents i
+        LEFT JOIN raw.sites s
+            ON i.site_id = s.site_id
+    """
+) ,
+Rule(
+    rule_id="DQ007",
+    rule_name="lost days non negative",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE lost_days < 0
+            ) AS rows_failed
+        FROM raw.incidents
+    """
+),
+Rule(
+    rule_id="DQ008",
+    rule_name="incident date not in future",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE incident_date > current_date
+            ) AS rows_failed
+        FROM raw.incidents
+    """
+),
+Rule(
+    rule_id="DQ009",
+    rule_name="recordable flag valid",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE is_recordable NOT IN ('Y','N')
+            ) AS rows_failed
+        FROM raw.incidents
+    """
+),
+Rule(
+    rule_id="DQ010",
+    rule_name="metric code unique",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) - count(DISTINCT metric_code) AS rows_failed
+        FROM raw.metrics
+    """
+),
+Rule(
+    rule_id="DQ011",
+    rule_name="valid metric category",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE category NOT IN (
+                    'Emissions',
+                    'Energy',
+                    'Water',
+                    'Waste',
+                    'Safety'
+                )
+            ) AS rows_failed
+        FROM raw.metrics
+    """
+),
+ Rule(
+    rule_id="DQ012",
+    rule_name="uom not null",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE canonical_uom IS NULL
+                   OR trim(canonical_uom) = ''
+            ) AS rows_failed
+        FROM raw.metrics
+    """
+),
+Rule(
+    rule_id="DQ013",
+    rule_name="uom conversion unique",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) - count(DISTINCT from_uom || '|' || to_uom) AS rows_failed
+        FROM raw.uom_conversion
+    """
+),
+Rule(
+    rule_id="DQ014",
+    rule_name="conversion factor positive",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE factor <= 0
+            ) AS rows_failed
+        FROM raw.uom_conversion
+    """
+),
+Rule(
+    rule_id="DQ015",
+    rule_name="uom not null",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE from_uom IS NULL
+                   OR to_uom IS NULL
+            ) AS rows_failed
+        FROM raw.uom_conversion
+    """
+),
+Rule(
+    rule_id="DQ016",
+    rule_name="factor is numeric",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE try_cast(factor AS DOUBLE) IS NULL
+            ) AS rows_failed
+        FROM raw.uom_conversion
+    """
+),
+Rule(
+    rule_id="DQ017",
+    rule_name="reading id unique",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) - count(DISTINCT reading_id) AS rows_failed
+        FROM raw.readings
+    """
+),
+Rule(
+    rule_id="DQ018",
+    rule_name="metric exists",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE m.metric_code IS NULL
+            ) AS rows_failed
+        FROM raw.readings r
+        LEFT JOIN dim.metric m
+            ON r.metric_code = m.metric_code
+    """
+),
+Rule(
+    rule_id="DQ019",
+    rule_name="site exists",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE s.site_id IS NULL
+            ) AS rows_failed
+        FROM raw.readings r
+        LEFT JOIN dim.site s
+            ON r.site_id = s.site_id
+    """
+),
+Rule(
+    rule_id="DQ020",
+    rule_name="metric and uom consistent",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE
+                    (metric_code = 'ENERGY_CONS'  AND uom <> 'MWh')
+                 OR (metric_code = 'WATER_WD'     AND uom <> 'm3')
+                 OR (metric_code = 'HOURS_WORKED' AND uom <> 'hours')
+                 OR (metric_code = 'SCOPE1_GHG'   AND uom <> 't')
+                 OR (metric_code = 'SCOPE2_GHG'   AND uom <> 't')
+                 OR (metric_code = 'WASTE_TOTAL'  AND uom <> 't')
+            ) AS rows_failed
+        FROM raw.readings
+    """
+),
+ Rule(
+    rule_id="DQ021",
+    rule_name="valid source system",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE source_system NOT IN (
+                    'SAP_EHS',
+                    'SITE_PORTAL',
+                    'MANUAL_XLS'
+                )
+            ) AS rows_failed
+        FROM raw.readings
+    """
+),
+Rule(
+    rule_id="DQ022",
+    rule_name="period format yyyy-mm",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE try_strptime(period, '%Y-%m') IS NULL
+            ) AS rows_failed
+        FROM raw.readings
+    """
+),
+Rule(
+    rule_id="DQ023",
+    rule_name="one reading per site period metric",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE cnt > 1
+            ) AS rows_failed
+        FROM (
+            SELECT
+                site_id,
+                period,
+                metric_code,
+                count(*) AS cnt
+            FROM raw.readings
+            GROUP BY 1,2,3
+        )
+    """
+)
     
     # ------------------------------------------------------------------ TODO
     # Add your rules below. Think about what would actually mislead the Group
