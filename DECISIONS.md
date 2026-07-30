@@ -32,19 +32,85 @@ Non-critical issues were classified as **WARN / LOG** because they represent sta
 
 These records remain available for reporting but are logged for remediation.
 
-## 3. Reconciliation conclusion
+## 3. Data quality issues ranked by materiality
+
+### High materiality
+1. Missing or unknown site identifiers
+   - Records cannot be assigned to a reporting entity.
+   - Excluded from KPI calculations until corrected.
+
+2. Duplicate measurements
+   - Can overstate energy, emissions, water or waste figures.
+   - Requires source-system reconciliation.
+
+3. Invalid units of measure
+   - Creates risk of incorrect aggregation and KPI distortion.
+
+### Medium materiality
+4. Invalid date ranges
+   - Affects period allocation and comparability.
+
+5. Missing metric codes
+   - Prevents classification into reporting KPIs.
+
+### Low materiality
+6. Country code standardization issues
+   - No direct impact on KPI values.
+   - Impacts reporting consistency only.
+  
+## 4. Actions required from site controllers
+
+- Submit records using approved metric codes only.
+- Use canonical reporting units defined by Group Sustainability.
+- Resolve duplicate submissions before reporting deadlines.
+- Ensure site identifiers exist in the approved master-data list.
+- Validate reporting periods before file submission.
+
+## 5. What I would build next
+
+- Automated data-quality scorecards by site.
+- Trend and anomaly detection for KPI movements.
+- Reconciliation dashboard showing rejected and corrected records.
+- Data-quality KPIs for site-controller performance.
+
+## Deliberately left out
+
+- Predictive modelling.
+- Non-material formatting corrections beyond logging.
+
+## 4. Reconciliation conclusion
 
 Based on the implemented validation framework, KPI values generated from records that passed all ERROR-level checks are suitable for management reporting and external audit review.
 
 Remaining WARN-level issues relate primarily to reference-data standardization and do not materially impact KPI calculations. These items should be addressed as part of ongoing data-quality improvement activities.
 
-## Site Dimension
+## 5. Actions required from site controllers
+
+- Submit records using approved metric codes only.
+- Use canonical reporting units defined by Group Sustainability.
+- Resolve duplicate submissions before reporting deadlines.
+- Ensure site identifiers exist in the approved master-data list.
+- Validate reporting periods before file submission.
+
+## 6. What I would build next
+
+- Automated data-quality scorecards by site.
+- Reconciliation dashboard for rejected and corrected records.
+- KPI trend and anomaly monitoring.
+
+### Deliberately left out
+
+- Predictive modelling.
+- Machine-learning anomaly detection.
+- Additional checks with limited impact on reported figures.
+
+## 7. Site Dimension
 
 Implemented as SCD Type 2.
 
 Reason:
-Sites may be acquired or divested during the reporting period.
-SCD Type 2 preserves historical context by creating a new version of a site whenever tracked attributes change.
-This allows historical EQS metrics and incidents to remain associated with the correct site version while avoiding updates to historical facts.
+Sites may be acquired, divested, renamed, or reassigned over time. SCD Type 2 preserves the historical state of site attributes by creating a new version whenever a tracked attribute changes.
+
+This approach ensures that historical sustainability metrics remain associated with the correct site context at the time of reporting, supporting accurate trend analysis, reconciliation, and auditability without modifying historical fact records.
 
 
