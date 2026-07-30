@@ -56,6 +56,56 @@ RULES: list[Rule] = [
             WHERE try_cast(value AS DOUBLE) IS NULL
         """,
     ),
+    Rule(
+    rule_id="DQ002",
+    rule_name="site_id unique",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) - count(DISTINCT site_id) AS rows_failed
+        FROM raw.sites
+    """
+    ),
+    Rule(
+    rule_id="DQ003",
+    rule_name="country must be ISO-2 code",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE length(country) <> 2
+                   OR country <> upper(country)
+            ) AS rows_failed
+        FROM raw.sites
+    """,
+    detail_sql="""
+        SELECT *,
+               'invalid country code' AS reason
+        FROM raw.sites
+        WHERE length(country) <> 2
+           OR country <> upper(country)
+    """
+),
+ Rule(
+    rule_id="DQ004",
+    rule_name="valid_to after valid_from",
+    severity="ERROR",
+    action="QUARANTINE",
+    check_sql="""
+        SELECT
+            count(*) AS rows_checked,
+            count(*) FILTER (
+                WHERE valid_to IS NOT NULL
+                  AND valid_to < valid_from
+            ) AS rows_failed
+        FROM raw.sites
+    """
+)   
+    
     # ------------------------------------------------------------------ TODO
     # Add your rules below. Think about what would actually mislead the Group
     # Sustainability lead if it went unnoticed, and set severity accordingly.
