@@ -38,6 +38,13 @@ Based on the implemented validation framework, KPI values generated from records
 
 Remaining WARN-level issues relate primarily to reference-data standardization and do not materially impact KPI calculations. These items should be addressed as part of ongoing data-quality improvement activities.
 
+## Site Dimension
 
+Implemented as SCD Type 2.
+
+Reason:
+Sites may be acquired or divested during the reporting period.
+SCD Type 2 preserves historical context by creating a new version of a site whenever tracked attributes change.
+This allows historical EQS metrics and incidents to remain associated with the correct site version while avoiding updates to historical facts.
 
 
