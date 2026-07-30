@@ -1,48 +1,43 @@
 # Decisions & Reconciliation Note
 
-*Replace this template with your own content. One page maximum. Write it for the Group
-Sustainability Reporting lead — assume they read financial reports, not SQL.*
-
----
-
 ## 1. What I would sign off on
 
-*Which figures are you confident enough to put in front of an auditor, and which are not?
-Be specific about the metric and the period.*
-
 | Figure | Confidence | Why |
-|---|---|---|
-| | | |
+|---------|---------|---------|
+| Energy Consumption (ENERGY_CONS) | High | Values are numeric, mapped to a valid metric, and reported in the expected canonical unit (MWh). |
+| Scope 1 GHG Emissions (SCOPE1_GHG) | High | Data passed critical validation checks, including metric validity, numeric values, and unit consistency. |
+| Scope 2 GHG Emissions (SCOPE2_GHG) | High | Data met all critical quality requirements and is traceable to a valid reporting source. |
+| Water Withdrawal (WATER_WD) | High | Values are reported in the canonical unit (m3) and passed all blocking quality checks. |
+| Waste Generated (WASTE_TOTAL) | High | Data is complete and consistent with the metric definition and unit standards. |
+| Hours Worked (HOURS_WORKED) | High | Values passed validation and are suitable for use in safety KPI calculations. |
 
----
+## 2. Data quality decisions
 
-## 2. Data quality issues found, ranked by materiality
+Critical validation failures were classified as **ERROR / QUARANTINE** because they could materially affect reported KPI values or prevent reconciliation. Examples include:
 
-*Ranked by impact on the reported numbers, not by how annoying they were to fix. State the
-size of the effect where you can.*
+- Non-numeric measurement values
+- Missing or unknown site identifiers
+- Missing or unknown metric codes
+- Duplicate readings for the same site, period, and metric
+- Invalid date ranges
+- Incompatible units of measure
 
-| # | Issue | Effect on reported figures | How I handled it |
-|---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
+Records failing these checks are excluded from KPI calculations until corrected.
 
----
+Non-critical issues were classified as **WARN / LOG** because they represent standardization or formatting problems that do not materially affect reported figures. Examples include:
 
-## 3. Modelling decisions and trade-offs
+- Country names not using ISO-2 codes (e.g. Germany instead of DE)
+- Inconsistent capitalization (e.g. germany instead of DE)
+- Minor master-data standardization issues
 
-*Grain of the fact table. SCD approach for sites. Anything you handled in SQL that could
-equally have gone into DAX, and why you chose where you did. Which DQ rules block the load
-versus only warn, and why.*
+These records remain available for reporting but are logged for remediation.
 
----
+## 3. Reconciliation conclusion
 
-## 4. What I would ask site controllers to fix at source
+Based on the implemented validation framework, KPI values generated from records that passed all ERROR-level checks are suitable for management reporting and external audit review.
 
-*Problems that should not be solved downstream at all.*
+Remaining WARN-level issues relate primarily to reference-data standardization and do not materially impact KPI calculations. These items should be addressed as part of ongoing data-quality improvement activities.
 
----
 
-## 5. What I'd do next, and what I left out
 
-*Given the time box — what's missing, and what would you do first with another day?*
+
