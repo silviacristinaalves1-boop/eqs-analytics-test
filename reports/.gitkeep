@@ -1,0 +1,24 @@
+rule_id,rule_name,severity,rows_checked,rows_failed,action_taken
+DQ001,reading value is numeric,ERROR,120,2,QUARANTINE
+DQ002,site_id unique,ERROR,12,0,PASS
+DQ003,country must be ISO-2 code,ERROR,12,3,QUARANTINE
+DQ004,valid_to after valid_from,ERROR,12,0,PASS
+DQ005,incident_id unique,ERROR,8,0,PASS
+DQ006,site exists,ERROR,8,0,PASS
+DQ007,lost days non negative,ERROR,8,0,PASS
+DQ008,incident date not in future,ERROR,8,0,PASS
+DQ009,recordable flag valid,ERROR,8,0,PASS
+DQ010,metric code unique,ERROR,6,0,PASS
+DQ011,valid metric category,ERROR,6,0,PASS
+DQ012,uom not null,ERROR,6,0,PASS
+DQ013,uom conversion unique,ERROR,8,0,PASS
+DQ014,conversion factor positive,ERROR,8,0,PASS
+DQ015,uom not null,ERROR,8,0,PASS
+DQ016,factor is numeric,ERROR,8,0,PASS
+DQ017,reading id unique,ERROR,48,0,PASS
+DQ018,metric exists,ERROR,48,0,PASS
+DQ019,site exists,ERROR,48,0,PASS
+DQ020,metric and uom consistent,ERROR,48,1,QUARANTINE
+DQ021,valid source system,ERROR,48,0,PASS
+DQ022,period format yyyy-mm,ERROR,48,0,PASS
+DQ023,one reading per site period metric,ERROR,48,1,QUARANTINE
